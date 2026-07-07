@@ -1,0 +1,100 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: esmaeili
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: esmaeili_platform
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U esmaeili -d esmaeili_platform"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      API_PREFIX: api/v1
+      DATABASE_URL: postgresql://esmaeili:pass@localhost:5432/esmaeili_platform?schema=public
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ''
+      JWT_SECRET: ci-test-secret-minimum-32-characters-long
+      JWT_EXPIRES_IN: 7d
+      OTP_LENGTH: 5
+      OTP_TTL_SECONDS: 120
+      OTP_MAX_ATTEMPTS: 5
+      SMS_PROVIDER: mock
+      SMS_API_KEY: ''
+      SMS_SENDER_LINE: ''
+      THROTTLE_TTL: 60
+      THROTTLE_LIMIT: 10
+      CORS_ORIGIN: http://localhost:3002
+      STORAGE_BUCKET: esmaeili-dev
+      STORAGE_REGION: default
+      STORAGE_ENDPOINT: https://s3.ir-thr-at1.arvanstorage.ir
+      STORAGE_ACCESS_KEY_ID: test-key
+      STORAGE_SECRET_ACCESS_KEY: test-secret
+      STORAGE_PUBLIC_BASE_URL: https://esmaeili-dev.s3.ir-thr-at1.arvanstorage.ir
+      SENTRY_DSN: ''
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run migrations
+        run: npx prisma migrate deploy
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: E2E tests
+        run: npm run test:e2e
+
+      - name: Build
+        run: npm run build

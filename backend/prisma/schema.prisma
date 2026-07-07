@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum PropertyType {
+  VILLA
+  LAND
+  SHOP
+  APARTMENT
+  PADDY_FIELD
+}
+
+enum DealType {
+  SALE
+  RENT
+}
+
+enum PropertyStatus {
+  ACTIVE
+  SOLD
+  ARCHIVED
+}
+
+enum AdminServiceType {
+  SINGLE_DEED
+  OLD_DEED_CONVERSION
+  SURVEY_SSBR
+  SUBDIVISION
+  PURCHASE_SALE_CONSULTATION
+  OTHER
+}
+
+enum CaseStatus {
+  SUBMITTED
+  DOCUMENT_REVIEW
+  AGENCY_FOLLOW_UP
+  COMPLETED
+  FAILED
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  mobile    String   @unique
+  fullName  String?  @map("full_name")
+  role      UserRole @default(CUSTOMER)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  properties    Property[]
+  adminRequests AdminServiceRequest[]
+
+  @@map("users")
+}
+
+model Property {
+  id            String         @id @default(uuid())
+  ownerId       String?        @map("owner_id")
+  owner         User?          @relation(fields: [ownerId], references: [id])
+  title         String
+  description   String?
+  type          PropertyType
+  dealType      DealType       @map("deal_type")
+  price         Decimal        @db.Decimal(14, 0)
+  areaSqm       Decimal?       @map("area_sqm") @db.Decimal(10, 2)
+  province      String?
+  city          String
+  region        String?
+  latitude      Float?
+  longitude     Float?
+  hasSingleDeed Boolean        @default(false) @map("has_single_deed")
+  status        PropertyStatus @default(ACTIVE)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  images PropertyImage[]
+
+  @@index([type, dealType, city, status])
+  @@index([province])
+  @@map("properties")
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  propertyId String   @map("property_id")
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("property_images")
+}
+
+model AdminServiceRequest {
+  id            String           @id @default(uuid())
+  trackingCode  String           @unique @map("tracking_code")
+  userId        String?          @map("user_id")
+  user          User?            @relation(fields: [userId], references: [id])
+  contactMobile String           @map("contact_mobile")
+  serviceType   AdminServiceType @map("service_type")
+  status        CaseStatus       @default(SUBMITTED)
+  notes         String?
+  internalNotes String?          @map("internal_notes")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  documents     CaseDocument[]
+  statusHistory CaseStatusHistory[]
+
+  @@index([contactMobile])
+  @@map("admin_service_requests")
+}
+
+model CaseDocument {
+  id        String              @id @default(uuid())
+  requestId String              @map("request_id")
+  request   AdminServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fileUrl   String              @map("file_url")
+  fileName  String              @map("file_name")
+  createdAt DateTime            @default(now()) @map("created_at")
+
+  @@map("case_documents")
+}
+
+model CaseStatusHistory {
+  id        String              @id @default(uuid())
+  requestId String              @map("request_id")
+  request   AdminServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  oldStatus CaseStatus?         @map("old_status")
+  newStatus CaseStatus          @map("new_status")
+  note      String?
+  createdAt DateTime            @default(now()) @map("created_at")
+
+  @@map("case_status_history")
+}
+
+model ContactRequest {
+  id        String   @id @default(uuid())
+  name      String
+  mobile    String
+  message   String
+  isHandled Boolean  @default(false) @map("is_handled")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_requests")
+}
+
+model MessageLog {
+  id        String        @id @default(uuid())
+  mobile    String
+  message   String
+  status    MessageStatus @default(PENDING)
+  error     String?
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  @@index([mobile])
+  @@map("message_logs")
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}

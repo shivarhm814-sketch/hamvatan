@@ -1,0 +1,11 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="هم‌وطن">
+  <path
+    d="M100 58 L166 106 L142 106 L142 142 L114 142 L114 178 L86 178 L86 142 L58 142 L58 106 L34 106 Z
+       M105 151 h17 v13 h-17 Z"
+    fill="#174A73"
+    fill-rule="evenodd"
+  />
+  <circle cx="155" cy="155" r="30" fill="#E8B400" stroke="#E8B400" stroke-width="9" stroke-dasharray="5.2 4.6"/>
+  <circle cx="155" cy="155" r="26" fill="#E8B400"/>
+  <path d="M144 155 L152 163 L167 145" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

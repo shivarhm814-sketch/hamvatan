@@ -1,0 +1,15 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="هم‌وطن">
+  <path
+    d="M100 58 L166 106 L142 106 L142 142 L114 142 L114 178 L86 178 L86 142 L58 142 L58 106 L34 106 Z
+       M105 151 h17 v13 h-17 Z"
+    fill="#FFFFFF"
+    fill-rule="evenodd"
+  />
+  <circle cx="155" cy="155" r="30" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-dasharray="5.2 4.6"/>
+  <path
+    d="M155 129 a26 26 0 1 1 -0.1 0 Z
+       M144 155 L152 163 L167 145 L163.5 141.8 L151.7 156 L148 152.5 Z"
+    fill="#FFFFFF"
+    fill-rule="evenodd"
+  />
+</svg>
