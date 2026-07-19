@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CONTACT, MESSENGERS } from '@/lib/constants';
+import { CONTACT, FOOTER_CONTACT_MESSENGERS } from '@/lib/constants';
 
 export function Footer() {
   return (
@@ -36,6 +36,9 @@ export function Footer() {
             <Link href="/services/request" className="w-fit hover:text-secondary">
               بررسی رایگان مدارک
             </Link>
+            <Link href="/construction" className="w-fit hover:text-secondary">
+              ساخت و پیمانکاری
+            </Link>
             <Link href="/services/track" className="w-fit hover:text-secondary">
               پیگیری پرونده
             </Link>
@@ -47,44 +50,57 @@ export function Footer() {
 
         <div>
           <h4 className="mb-3 font-bold text-white">تماس با ما</h4>
-          <div className="flex flex-col gap-2 text-sm">
-            <a href={CONTACT.phoneHref} dir="ltr" className="w-fit hover:text-secondary">
-              {CONTACT.phoneDisplay}
-            </a>
-            <a href={CONTACT.phoneSecondaryHref} dir="ltr" className="w-fit hover:text-secondary">
-              {CONTACT.phoneSecondaryDisplay}
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-center gap-3 border-t border-white/10 py-5">
-        {MESSENGERS.map((messenger) =>
-          messenger.href ? (
+          <div className="flex flex-col gap-3 text-sm">
             <a
-              key={messenger.name}
-              href={messenger.href}
+              href={CONTACT.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              title={messenger.name}
-              aria-label={messenger.name}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-xl text-white transition hover:opacity-85"
-              style={{ backgroundColor: messenger.color }}
+              className="flex w-fit items-center gap-2 hover:text-secondary"
             >
-              <i className={`ph-fill ${messenger.icon}`} />
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-lg text-white">
+                <i className="ph-fill ph-whatsapp-logo" />
+              </span>
+              واتساپ
             </a>
-          ) : (
-            <span
-              key={messenger.name}
-              title={`${messenger.name} — به‌زودی`}
-              aria-label={`${messenger.name} — به‌زودی`}
-              className="flex h-10 w-10 cursor-default items-center justify-center rounded-full text-xl text-white opacity-50"
-              style={{ backgroundColor: messenger.color }}
-            >
-              <i className={`ph-fill ${messenger.icon}`} />
-            </span>
-          ),
-        )}
+            {FOOTER_CONTACT_MESSENGERS.map((messenger) =>
+              messenger.href ? (
+                <a
+                  key={messenger.name}
+                  href={messenger.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-fit items-center gap-2 hover:text-secondary"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={messenger.image}
+                    alt={messenger.name}
+                    width={32}
+                    height={32}
+                    className="h-8 w-8 shrink-0 rounded-full object-cover"
+                  />
+                  {messenger.name}
+                </a>
+              ) : (
+                <span
+                  key={messenger.name}
+                  title={`${messenger.name} — به‌زودی`}
+                  className="flex w-fit cursor-default items-center gap-2 opacity-50"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={messenger.image}
+                    alt={messenger.name}
+                    width={32}
+                    height={32}
+                    className="h-8 w-8 shrink-0 rounded-full object-cover"
+                  />
+                  {messenger.name}
+                </span>
+              ),
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="border-t border-white/10 py-4 text-center text-xs text-[rgba(255,255,255,0.6)]">

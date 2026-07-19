@@ -13,12 +13,18 @@ const GROUPS = [
     title: 'گروه خدمات اداری',
     desc: 'اخذ سند تک‌برگ، تبدیل سند قدیمی، نقشه‌برداری و تفکیک ملک؛ پیگیری کامل امور ثبتی تا صدور سند.',
   },
+  {
+    href: '/construction',
+    icon: 'ph-hard-hat',
+    title: 'گروه ساخت و پیمانکاری',
+    desc: 'مشارکت در ساخت، پیمانکاری ویلا و ساختمان، بازسازی و نوسازی، خانه هوشمند و طراحی معماری.',
+  },
 ];
 
 export function ServiceGroups() {
   return (
     <section className="mx-auto max-w-[1200px] px-5 py-[clamp(44px,6vw,72px)]">
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
         {GROUPS.map((group) => (
           <Link
             key={group.href}

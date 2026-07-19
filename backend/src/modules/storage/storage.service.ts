@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { extname, join } from 'path';
+import { join } from 'path';
 import { mkdir, rm, writeFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import { StoragePort, UploadableFile } from './storage-port.interface';
@@ -37,8 +37,7 @@ export class StorageService implements StoragePort {
   }
 
   async upload(folder: string, file: UploadableFile): Promise<string> {
-    const extension = extname(file.originalname);
-    const key = `${folder}/${randomUUID()}${extension}`;
+    const key = `${folder}/${randomUUID()}${file.extension}`;
 
     if (this.provider === 'local') {
       const filePath = join(this.localRootDir, key);

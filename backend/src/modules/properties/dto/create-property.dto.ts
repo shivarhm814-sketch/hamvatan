@@ -1,5 +1,14 @@
 import { DealType, PropertyStatus, PropertyType } from '@prisma/client';
-import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 export class CreatePropertyDto {
   @IsString()

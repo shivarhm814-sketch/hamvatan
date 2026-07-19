@@ -7,7 +7,10 @@ export const envValidationSchema = Joi.object({
 
   DATABASE_URL: Joi.string().uri().required(),
 
-  REDIS_HOST: Joi.string().required(),
+  // Either REDIS_URL (Railway/Render/Heroku-style single connection string) or the
+  // individual REDIS_HOST/PORT/PASSWORD (local docker-compose) must be provided.
+  REDIS_URL: Joi.string().uri().optional(),
+  REDIS_HOST: Joi.string().optional(),
   REDIS_PORT: Joi.number().default(6379),
   REDIS_PASSWORD: Joi.string().allow('').optional(),
 

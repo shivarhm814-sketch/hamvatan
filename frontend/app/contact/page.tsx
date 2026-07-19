@@ -37,30 +37,6 @@ export default function ContactPage() {
       <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] items-start gap-8">
         <div className="flex flex-col gap-4">
           <a
-            href={CONTACT.phoneHref}
-            className="flex items-center gap-4 rounded-xl border border-line bg-surface p-5 transition hover:-translate-y-1"
-          >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-soft text-2xl text-primary">
-              <i className="ph ph-phone-call" />
-            </span>
-            <span dir="ltr" className="font-bold text-ink">
-              {CONTACT.phoneDisplay}
-            </span>
-          </a>
-
-          <a
-            href={CONTACT.phoneSecondaryHref}
-            className="flex items-center gap-4 rounded-xl border border-line bg-surface p-5 transition hover:-translate-y-1"
-          >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-soft text-2xl text-primary">
-              <i className="ph ph-phone-call" />
-            </span>
-            <span dir="ltr" className="font-bold text-ink">
-              {CONTACT.phoneSecondaryDisplay}
-            </span>
-          </a>
-
-          <a
             href={CONTACT.whatsappHref}
             className="flex items-center gap-4 rounded-xl border border-line bg-surface p-5 transition hover:-translate-y-1"
           >

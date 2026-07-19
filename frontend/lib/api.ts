@@ -169,8 +169,15 @@ export function trackCase(code: string): Promise<AdminServiceRequest> {
   return apiFetch(`/admin-service-requests/track/${encodeURIComponent(code)}`, { cache: 'no-store' });
 }
 
-export function listAdminServiceRequests(token: string, status?: string): Promise<AdminServiceRequest[]> {
-  return apiFetch(`/admin-service-requests${buildQuery({ status })}`, { token, cache: 'no-store' });
+export function listAdminServiceRequests(
+  token: string,
+  status?: string,
+  serviceType?: string,
+): Promise<AdminServiceRequest[]> {
+  return apiFetch(`/admin-service-requests${buildQuery({ status, serviceType })}`, {
+    token,
+    cache: 'no-store',
+  });
 }
 
 export function getCaseDetail(token: string, id: string): Promise<AdminServiceRequestDetail> {

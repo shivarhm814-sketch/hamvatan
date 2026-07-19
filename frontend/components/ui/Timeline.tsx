@@ -6,6 +6,7 @@ const STAGE_ORDER: CaseStatus[] = ['SUBMITTED', 'DOCUMENT_REVIEW', 'AGENCY_FOLLO
 interface TimelineProps {
   status: CaseStatus;
   history: CaseStatusHistoryItem[];
+  serviceType?: string;
 }
 
 function formatDate(iso: string): string {
@@ -19,7 +20,7 @@ function reachedIndex(history: CaseStatusHistoryItem[]): number {
   return indices.length > 0 ? Math.max(...indices) : -1;
 }
 
-export function Timeline({ status, history }: TimelineProps) {
+export function Timeline({ status, history, serviceType }: TimelineProps) {
   const isFailed = status === 'FAILED';
   const currentIndex = isFailed ? reachedIndex(history) : STAGE_ORDER.indexOf(status);
   const dateByStatus = new Map(history.map((item) => [item.newStatus, item.createdAt]));
@@ -29,7 +30,7 @@ export function Timeline({ status, history }: TimelineProps) {
       {isFailed && (
         <p className="mb-4 flex items-center gap-2 rounded-lg bg-[rgba(192,57,43,0.08)] p-3 text-sm text-error">
           <i className="ph-fill ph-x-circle" />
-          این پرونده در وضعیت «{caseStatusLabel('FAILED')}» قرار دارد. جهت پیگیری با ما تماس بگیرید.
+          این پرونده در وضعیت «{caseStatusLabel('FAILED', serviceType)}» قرار دارد. جهت پیگیری با ما تماس بگیرید.
         </p>
       )}
       {STAGE_ORDER.map((stage, index) => {
@@ -64,7 +65,7 @@ export function Timeline({ status, history }: TimelineProps) {
               {!isLast && <span className="w-[2px] flex-1 bg-line" />}
             </div>
             <div className="pb-8">
-              <p className={`font-bold ${labelColor}`}>{caseStatusLabel(stage)}</p>
+              <p className={`font-bold ${labelColor}`}>{caseStatusLabel(stage, serviceType)}</p>
               <p className="text-sm text-muted">{date ? formatDate(date) : '—'}</p>
             </div>
           </div>

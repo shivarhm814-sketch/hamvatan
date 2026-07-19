@@ -55,16 +55,51 @@ describe('AdminServiceRequestsService', () => {
         cb({ adminServiceRequest: txAdminServiceRequest, caseStatusHistory: txCaseStatusHistory }),
       );
 
+      const PDF_MAGIC_BYTES = Buffer.from('%PDF-1.4');
+
       const result = await service.create(
         { contactMobile: '09121234567', serviceType: AdminServiceType.SINGLE_DEED },
-        [{ buffer: Buffer.from(''), mimetype: 'application/pdf', originalname: 'deed.pdf' }],
+        [
+          {
+            buffer: PDF_MAGIC_BYTES,
+            mimetype: 'application/pdf',
+            originalname: 'deed.pdf',
+          } as Express.Multer.File,
+        ],
       );
 
-      expect(storageMock.upload).toHaveBeenCalledWith('case-documents', expect.any(Object));
+      expect(storageMock.upload).toHaveBeenCalledWith('case-documents', {
+        buffer: PDF_MAGIC_BYTES,
+        mimetype: 'application/pdf',
+        extension: '.pdf',
+      });
       expect(txCaseStatusHistory.create).toHaveBeenCalledWith({
         data: { requestId: 'req1', oldStatus: null, newStatus: CaseStatus.SUBMITTED },
       });
       expect(result).toEqual({ id: 'req1', trackingCode: 'ABCDEF12' });
+    });
+
+    it('accepts CONSTRUCTION_PARTNERSHIP as a valid service type', async () => {
+      prismaMock.adminServiceRequest.findUnique.mockResolvedValue(null);
+
+      const txAdminServiceRequest = {
+        create: jest.fn().mockResolvedValue({
+          id: '1',
+          trackingCode: 'ABC',
+          serviceType: AdminServiceType.CONSTRUCTION_PARTNERSHIP,
+        }),
+      };
+      const txCaseStatusHistory = { create: jest.fn().mockResolvedValue({}) };
+      prismaMock.$transaction.mockImplementation(async (cb) =>
+        cb({ adminServiceRequest: txAdminServiceRequest, caseStatusHistory: txCaseStatusHistory }),
+      );
+
+      const result = await service.create(
+        { contactMobile: '09120000000', serviceType: AdminServiceType.CONSTRUCTION_PARTNERSHIP },
+        [],
+      );
+
+      expect(result.serviceType).toBe(AdminServiceType.CONSTRUCTION_PARTNERSHIP);
     });
   });
 
@@ -113,6 +148,24 @@ describe('AdminServiceRequestsService', () => {
       await service.findAllForAdmin(CaseStatus.DOCUMENT_REVIEW);
       expect(prismaMock.adminServiceRequest.findMany).toHaveBeenCalledWith({
         where: { status: CaseStatus.DOCUMENT_REVIEW },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+
+    it('filters by serviceType when provided', async () => {
+      prismaMock.adminServiceRequest.findMany.mockResolvedValue([]);
+      await service.findAllForAdmin(undefined, AdminServiceType.CONSTRUCTION_PARTNERSHIP);
+      expect(prismaMock.adminServiceRequest.findMany).toHaveBeenCalledWith({
+        where: { serviceType: AdminServiceType.CONSTRUCTION_PARTNERSHIP },
+        orderBy: { createdAt: 'desc' },
+      });
+    });
+
+    it('filters by both status and serviceType when both are provided', async () => {
+      prismaMock.adminServiceRequest.findMany.mockResolvedValue([]);
+      await service.findAllForAdmin(CaseStatus.SUBMITTED, AdminServiceType.SINGLE_DEED);
+      expect(prismaMock.adminServiceRequest.findMany).toHaveBeenCalledWith({
+        where: { status: CaseStatus.SUBMITTED, serviceType: AdminServiceType.SINGLE_DEED },
         orderBy: { createdAt: 'desc' },
       });
     });

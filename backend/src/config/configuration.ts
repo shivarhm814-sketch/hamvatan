@@ -1,3 +1,21 @@
+// Hosting providers (Railway, Render, Heroku, ...) typically expose Redis as a single
+// connection string rather than separate host/port/password env vars — parse it if present.
+function redisFromUrl(url?: string): { host?: string; port?: number; password?: string } {
+  if (!url) return {};
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname,
+      port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+      password: parsed.password || undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+const redisUrlParts = redisFromUrl(process.env.REDIS_URL);
+
 export default () => ({
   nodeEnv: process.env.NODE_ENV,
   port: parseInt(process.env.PORT ?? '3000', 10),
@@ -8,9 +26,9 @@ export default () => ({
   },
 
   redis: {
-    host: process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
-    password: process.env.REDIS_PASSWORD || undefined,
+    host: redisUrlParts.host ?? process.env.REDIS_HOST,
+    port: redisUrlParts.port ?? parseInt(process.env.REDIS_PORT ?? '6379', 10),
+    password: redisUrlParts.password ?? (process.env.REDIS_PASSWORD || undefined),
   },
 
   jwt: {

@@ -37,7 +37,7 @@ describe('StorageService', () => {
     const url = await service.upload('properties', {
       buffer: Buffer.from('data'),
       mimetype: 'image/png',
-      originalname: 'my photo.png',
+      extension: '.png',
     });
 
     expect(url).toMatch(
@@ -92,7 +92,7 @@ describe('StorageService', () => {
       const url = await localService.upload('properties', {
         buffer: Buffer.from('hello'),
         mimetype: 'image/png',
-        originalname: 'photo.png',
+        extension: '.png',
       });
 
       expect(url).toMatch(/^http:\/\/localhost:3000\/uploads\/properties\/[0-9a-f-]{36}\.png$/);
@@ -106,7 +106,7 @@ describe('StorageService', () => {
       const url = await localService.upload('properties', {
         buffer: Buffer.from('hello'),
         mimetype: 'image/png',
-        originalname: 'photo.png',
+        extension: '.png',
       });
       const key = url.replace('http://localhost:3000/uploads/', '');
       const filePath = join(localDir, key);

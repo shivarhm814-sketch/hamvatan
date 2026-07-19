@@ -1,8 +1,9 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { AdminServiceRequest, CaseStatus, Prisma } from '@prisma/client';
+import { AdminServiceRequest, AdminServiceType, CaseStatus, Prisma } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { STORAGE_PORT, StoragePort, UploadableFile } from '../storage/storage-port.interface';
+import { STORAGE_PORT, StoragePort } from '../storage/storage-port.interface';
+import { assertRealDocumentType } from '../../common/utils/file-upload.util';
 import { NotificationsService } from '../notifications/notifications.service';
 import { renderTemplate } from '../settings/settings.constants';
 import { SettingsService } from '../settings/settings.service';
@@ -20,13 +21,20 @@ export class AdminServiceRequestsService {
 
   async create(
     dto: CreateAdminServiceRequestDto,
-    files: UploadableFile[],
+    files: Express.Multer.File[],
     userId?: string,
   ): Promise<AdminServiceRequest> {
     const trackingCode = await this.generateUniqueTrackingCode();
 
     const documentUrls = await Promise.all(
-      files.map((file) => this.storage.upload('case-documents', file)),
+      files.map((file) => {
+        const detected = assertRealDocumentType(file.buffer);
+        return this.storage.upload('case-documents', {
+          buffer: file.buffer,
+          mimetype: detected.mimetype,
+          extension: detected.extension,
+        });
+      }),
     );
 
     return this.prisma.$transaction(async (tx) => {
@@ -58,8 +66,14 @@ export class AdminServiceRequestsService {
     });
   }
 
-  async findAllForAdmin(status?: CaseStatus): Promise<AdminServiceRequest[]> {
-    const where: Prisma.AdminServiceRequestWhereInput = status ? { status } : {};
+  async findAllForAdmin(
+    status?: CaseStatus,
+    serviceType?: AdminServiceType,
+  ): Promise<AdminServiceRequest[]> {
+    const where: Prisma.AdminServiceRequestWhereInput = {
+      ...(status && { status }),
+      ...(serviceType && { serviceType }),
+    };
     return this.prisma.adminServiceRequest.findMany({ where, orderBy: { createdAt: 'desc' } });
   }
 

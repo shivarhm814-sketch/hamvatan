@@ -123,7 +123,7 @@ export default function AdminCaseDetailPage() {
           </h1>
           <p className="text-muted">{adminServiceTypeLabel(caseData.serviceType)}</p>
         </div>
-        <StatusBadge status={caseData.status} />
+        <StatusBadge status={caseData.status} serviceType={caseData.serviceType} />
       </div>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] items-start gap-6">
@@ -171,7 +171,7 @@ export default function AdminCaseDetailPage() {
 
           <div className="rounded-xl border border-line bg-surface p-5">
             <h2 className="mb-3 font-bold text-ink">تاریخچه وضعیت</h2>
-            <Timeline status={caseData.status} history={caseData.statusHistory} />
+            <Timeline status={caseData.status} history={caseData.statusHistory} serviceType={caseData.serviceType} />
           </div>
         </div>
 
@@ -190,7 +190,7 @@ export default function AdminCaseDetailPage() {
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s}>
-                    {caseStatusLabel(s)}
+                    {caseStatusLabel(s, caseData.serviceType)}
                   </option>
                 ))}
               </select>

@@ -17,13 +17,13 @@ const STATUS_ICONS: Record<CaseStatus, string> = {
   FAILED: 'ph-x-circle',
 };
 
-export function StatusBadge({ status }: { status: CaseStatus }) {
+export function StatusBadge({ status, serviceType }: { status: CaseStatus; serviceType?: string }) {
   return (
     <span
       className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${STATUS_STYLES[status]}`}
     >
       <i className={`ph-fill ${STATUS_ICONS[status]}`} />
-      {caseStatusLabel(status)}
+      {caseStatusLabel(status, serviceType)}
     </span>
   );
 }

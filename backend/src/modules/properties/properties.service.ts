@@ -1,7 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Property, PropertyImage, PropertyStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { STORAGE_PORT, StoragePort, UploadableFile } from '../storage/storage-port.interface';
+import { STORAGE_PORT, StoragePort } from '../storage/storage-port.interface';
+import { assertRealImageType } from '../../common/utils/file-upload.util';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { QueryAdminPropertiesDto } from './dto/query-admin-properties.dto';
 import { QueryPropertiesDto } from './dto/query-properties.dto';
@@ -120,9 +121,14 @@ export class PropertiesService {
     });
   }
 
-  async addImage(id: string, file: UploadableFile): Promise<PropertyImage> {
+  async addImage(id: string, file: Express.Multer.File): Promise<PropertyImage> {
     await this.findOneForAdmin(id);
-    const url = await this.storage.upload('properties', file);
+    const detected = assertRealImageType(file.buffer);
+    const url = await this.storage.upload('properties', {
+      buffer: file.buffer,
+      mimetype: detected.mimetype,
+      extension: detected.extension,
+    });
 
     const lastImage = await this.prisma.propertyImage.findFirst({
       where: { propertyId: id },

@@ -110,6 +110,28 @@ async function seedAdmin(): Promise<void> {
   console.log(`Admin bootstrap: ${adminMobile} ensured with role ADMIN.`);
 }
 
+async function seedConstructionRequest(): Promise<void> {
+  const trackingCode = 'ES-BUILD-001';
+  const existing = await prisma.adminServiceRequest.findUnique({ where: { trackingCode } });
+  if (existing) return;
+
+  await prisma.adminServiceRequest.create({
+    data: {
+      trackingCode,
+      contactMobile: '09120000001',
+      serviceType: 'CONSTRUCTION_PARTNERSHIP',
+      notes: 'زمین ۵۰۰ متری در نوشهر — مشارکت در ساخت ویلا',
+      statusHistory: {
+        create: {
+          newStatus: 'SUBMITTED',
+          note: 'درخواست نمونه ساخت و پیمانکاری',
+        },
+      },
+    },
+  });
+  console.log('Seed complete: 1 construction service request ensured.');
+}
+
 async function main(): Promise<void> {
   for (const property of properties) {
     const existing = await prisma.property.findFirst({ where: { title: property.title, city: property.city } });
@@ -121,6 +143,7 @@ async function main(): Promise<void> {
   }
   console.log(`Seed complete: ${properties.length} properties ensured.`);
 
+  await seedConstructionRequest();
   await seedAdmin();
 }
 

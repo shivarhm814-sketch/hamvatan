@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useRef, useState } from 'react';
 import { ApiRequestError, submitAdminServiceRequest } from '@/lib/api';
 
 const SERVICE_OPTIONS: { value: string; label: string }[] = [
@@ -11,7 +12,14 @@ const SERVICE_OPTIONS: { value: string; label: string }[] = [
   { value: 'SUBDIVISION', label: 'تفکیک و صورت‌مجلس تفکیکی' },
   { value: 'PURCHASE_SALE_CONSULTATION', label: 'مشاوره خرید یا فروش ملک' },
   { value: 'OTHER', label: 'سایر موارد' },
+  { value: 'CONSTRUCTION_PARTNERSHIP', label: 'مشارکت در ساخت' },
+  { value: 'CONSTRUCTION_CONTRACT', label: 'پیمانکاری ساخت (ویلا، مغازه، ساختمان)' },
+  { value: 'RENOVATION', label: 'بازسازی و نوسازی' },
+  { value: 'SMART_HOME', label: 'ساخت خانه هوشمند' },
+  { value: 'DESIGN_ENGINEERING', label: 'طراحی معماری و نقشه‌کشی' },
 ];
+
+const VALID_SERVICE_VALUES = new Set(SERVICE_OPTIONS.map((option) => option.value));
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -32,20 +40,46 @@ function validateDocuments(files: File[]): string | null {
   return null;
 }
 
-export default function ServiceRequestPage() {
+function formatFileSize(bytes: number): string {
+  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} مگابایت` : `${Math.ceil(bytes / 1024)} کیلوبایت`;
+}
+
+function ServiceRequestForm() {
+  const searchParams = useSearchParams();
+  const requestedType = searchParams.get('type');
+  const initialServiceType = requestedType && VALID_SERVICE_VALUES.has(requestedType) ? requestedType : '';
+
   const formRef = useRef<HTMLFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [serviceType, setServiceType] = useState(initialServiceType);
+  const [documents, setDocuments] = useState<File[]>([]);
   const [trackingCode, setTrackingCode] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files ?? []);
+    setError('');
+    const documentValidationError = validateDocuments(selected);
+    if (documentValidationError) {
+      setError(documentValidationError);
+      setDocuments([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+    setDocuments(selected);
+  };
+
+  const removeDocument = (index: number) => {
+    setDocuments((prev) => prev.filter((_, i) => i !== index));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
     const rawFormData = new FormData(e.currentTarget);
-    // A <input type="file" multiple> with nothing selected still yields one empty File entry —
-    // strip it out so an untouched optional field doesn't get rejected as an invalid upload.
-    const documents = (rawFormData.getAll('documents') as File[]).filter((file) => file.size > 0);
     const documentValidationError = validateDocuments(documents);
     if (documentValidationError) {
       setError(documentValidationError);
@@ -130,7 +164,8 @@ export default function ServiceRequestPage() {
           <select
             required
             name="serviceType"
-            defaultValue=""
+            value={serviceType}
+            onChange={(e) => setServiceType(e.target.value)}
             className="h-12 rounded-[10px] border border-line bg-bg px-4 focus:border-primary focus:outline-none"
           >
             <option value="" disabled>
@@ -157,9 +192,52 @@ export default function ServiceRequestPage() {
           آپلود مدارک
           <div className="flex flex-col items-center gap-2 rounded-[10px] border-2 border-dashed border-line p-6 text-center text-muted">
             <i className="ph ph-upload-simple text-2xl" />
-            <input type="file" name="documents" multiple accept=".jpg,.jpeg,.png,.pdf" className="text-sm" />
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".jpg,.jpeg,.png,.pdf"
+              className="text-sm"
+              onChange={handleFilesChange}
+            />
             <span className="text-xs">فرمت‌های مجاز: JPG، PNG، PDF — حداکثر ۱۰ مگابایت</span>
           </div>
+
+          {documents.length > 0 && (
+            <div className="mt-2 flex flex-col gap-2">
+              {documents.map((file, index) => (
+                <div
+                  key={`${file.name}-${index}`}
+                  className="flex items-center gap-3 rounded-[10px] border border-line bg-bg p-2.5"
+                >
+                  {file.type.startsWith('image/') ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      className="h-12 w-12 shrink-0 rounded-md object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-soft text-xl text-primary">
+                      <i className="ph ph-file-pdf" />
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1 text-right">
+                    <p className="truncate text-sm font-semibold text-ink">{file.name}</p>
+                    <p className="text-xs text-muted">{formatFileSize(file.size)}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeDocument(index)}
+                    aria-label="حذف فایل"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg text-error hover:bg-[rgba(198,40,40,0.08)]"
+                  >
+                    <i className="ph ph-x" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </label>
 
         {error && <p className="text-sm text-error">{error}</p>}
@@ -174,5 +252,13 @@ export default function ServiceRequestPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function ServiceRequestPage() {
+  return (
+    <Suspense fallback={null}>
+      <ServiceRequestForm />
+    </Suspense>
   );
 }

@@ -77,6 +77,8 @@ describe('PropertiesService', () => {
     expect(result.status).toBe(PropertyStatus.ARCHIVED);
   });
 
+  const PNG_MAGIC_BYTES = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
   it('addImage throws NotFoundException before attempting upload when property is missing', async () => {
     prismaMock.property.findUnique.mockResolvedValue(null);
 
@@ -85,8 +87,21 @@ describe('PropertiesService', () => {
         buffer: Buffer.from(''),
         mimetype: 'image/png',
         originalname: 'a.png',
-      }),
+      } as Express.Multer.File),
     ).rejects.toThrow(NotFoundException);
+    expect(storageMock.upload).not.toHaveBeenCalled();
+  });
+
+  it('addImage rejects a file whose real content is not JPEG/PNG, even with a spoofed mimetype', async () => {
+    prismaMock.property.findUnique.mockResolvedValue({ id: 'p1' });
+
+    await expect(
+      service.addImage('p1', {
+        buffer: Buffer.from('<svg onload=alert(1)>'),
+        mimetype: 'image/png',
+        originalname: 'a.png',
+      } as Express.Multer.File),
+    ).rejects.toThrow('فقط فایل‌های JPEG یا PNG مجاز هستند.');
     expect(storageMock.upload).not.toHaveBeenCalled();
   });
 
@@ -99,12 +114,16 @@ describe('PropertiesService', () => {
     });
 
     const result = await service.addImage('p1', {
-      buffer: Buffer.from(''),
+      buffer: PNG_MAGIC_BYTES,
       mimetype: 'image/png',
       originalname: 'a.png',
-    });
+    } as Express.Multer.File);
 
-    expect(storageMock.upload).toHaveBeenCalledWith('properties', expect.any(Object));
+    expect(storageMock.upload).toHaveBeenCalledWith('properties', {
+      buffer: PNG_MAGIC_BYTES,
+      mimetype: 'image/png',
+      extension: '.png',
+    });
     expect(result.url).toBe('https://cdn.example.com/properties/x.png');
   });
 

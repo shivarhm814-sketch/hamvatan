@@ -50,7 +50,7 @@ export class AdminServiceRequestsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.STAFF)
   findAll(@Query() query: QueryCasesDto): Promise<AdminServiceRequest[]> {
-    return this.service.findAllForAdmin(query.status);
+    return this.service.findAllForAdmin(query.status, query.serviceType);
   }
 
   @Get('track/:code')

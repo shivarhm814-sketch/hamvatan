@@ -74,7 +74,9 @@ export default function AdminDashboardPage() {
                         </p>
                         <p className="text-muted">{adminServiceTypeLabel(item.serviceType)}</p>
                       </div>
-                      <span className="text-xs font-semibold text-primary">{caseStatusLabel(item.status)}</span>
+                      <span className="text-xs font-semibold text-primary">
+                        {caseStatusLabel(item.status, item.serviceType)}
+                      </span>
                     </Link>
                   ))}
                 </div>
