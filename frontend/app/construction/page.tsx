@@ -84,7 +84,7 @@ export default function ConstructionPage() {
             از طراحی و نقشه‌کشی تا تحویل کلید — با بهترین مهندسان، طراحان و استادکاران خبره استان گیلان.
           </p>
           <Link
-            href="/services/request?type=CONSTRUCTION_CONTRACT"
+            href="/services/request"
             className="mx-auto flex h-[60px] w-fit items-center gap-2 rounded-[18px] bg-secondary px-6 font-bold text-[#3a2f00] shadow-[0_18px_40px_-20px_rgba(212,172,13,0.7)] transition hover:opacity-90"
           >
             <i className="ph ph-phone-call text-xl" />
