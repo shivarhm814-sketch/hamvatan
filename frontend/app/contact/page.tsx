@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AccentHeader } from '@/components/ui/AccentHeader';
 import { ApiRequestError, submitContactRequest } from '@/lib/api';
-import { CONTACT } from '@/lib/constants';
+import { CONTACT, FOOTER_CONTACT_MESSENGERS } from '@/lib/constants';
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
@@ -38,15 +38,41 @@ export default function ContactPage() {
         <div className="flex flex-col gap-4">
           <a
             href={CONTACT.whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-4 rounded-xl border border-line bg-surface p-5 transition hover:-translate-y-1"
           >
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(37,211,102,0.12)] text-2xl text-whatsapp">
               <i className="ph ph-whatsapp-logo" />
             </span>
-            <span dir="ltr" className="font-bold text-ink">
-              {CONTACT.whatsappDisplay}
-            </span>
+            <span className="font-bold text-ink">واتساپ</span>
           </a>
+
+          {FOOTER_CONTACT_MESSENGERS.map((messenger) =>
+            messenger.href ? (
+              <a
+                key={messenger.name}
+                href={messenger.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 rounded-xl border border-line bg-surface p-5 transition hover:-translate-y-1"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={messenger.image} alt={messenger.name} className="h-12 w-12 rounded-full object-cover" />
+                <span className="font-bold text-ink">{messenger.name}</span>
+              </a>
+            ) : (
+              <div
+                key={messenger.name}
+                title={`${messenger.name} — به‌زودی`}
+                className="flex items-center gap-4 rounded-xl border border-line bg-surface p-5 opacity-60"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={messenger.image} alt={messenger.name} className="h-12 w-12 rounded-full object-cover" />
+                <span className="font-bold text-ink">{messenger.name}</span>
+              </div>
+            ),
+          )}
 
           <div className="flex items-center gap-4 rounded-xl border border-line bg-surface p-5">
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-soft text-2xl text-primary">

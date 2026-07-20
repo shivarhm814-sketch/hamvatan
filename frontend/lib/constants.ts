@@ -1,6 +1,5 @@
 export const CONTACT = {
   phoneHref: 'tel:+989113308947',
-  whatsappDisplay: '۰۹۹۰ ۳۶۹ ۲۵۱۹',
   whatsappHref: 'https://wa.me/989903692519',
   manager: 'فرهاد اسماعیلی',
   workingHours: 'شنبه تا پنجشنبه، ۹ تا ۱۹',
