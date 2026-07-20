@@ -71,30 +71,38 @@ const CONSTRUCTION_SERVICE_TYPES = new Set([
 ]);
 const CONSULTATION_SERVICE_TYPES = new Set(['PURCHASE_SALE_CONSULTATION', 'OTHER']);
 
-type CaseStatusCategory = 'deed' | 'consultation' | 'construction';
+// هم‌راستا با ServiceCategory در backend/src/modules/settings/settings.constants.ts —
+// همان سه دسته، هم برای برچسب وضعیت در پنل و هم برای متن پیامک هر وضعیت استفاده می‌شود.
+export type ServiceCategory = 'DEED' | 'CONSULTATION' | 'CONSTRUCTION';
+export const SERVICE_CATEGORIES: ServiceCategory[] = ['DEED', 'CONSULTATION', 'CONSTRUCTION'];
+export const SERVICE_CATEGORY_LABELS_FA: Record<ServiceCategory, string> = {
+  DEED: 'خدمات اداری و ثبتی',
+  CONSULTATION: 'مشاوره و سایر',
+  CONSTRUCTION: 'ساخت و پیمانکاری',
+};
 
-function caseStatusCategoryOf(serviceType?: string): CaseStatusCategory {
-  if (serviceType && CONSTRUCTION_SERVICE_TYPES.has(serviceType)) return 'construction';
-  if (serviceType && CONSULTATION_SERVICE_TYPES.has(serviceType)) return 'consultation';
-  return 'deed';
+export function caseStatusCategoryOf(serviceType?: string): ServiceCategory {
+  if (serviceType && CONSTRUCTION_SERVICE_TYPES.has(serviceType)) return 'CONSTRUCTION';
+  if (serviceType && CONSULTATION_SERVICE_TYPES.has(serviceType)) return 'CONSULTATION';
+  return 'DEED';
 }
 
-const CASE_STATUS_LABELS_BY_CATEGORY: Record<CaseStatusCategory, Record<string, string>> = {
-  deed: {
+export const CASE_STATUS_LABELS_BY_CATEGORY: Record<ServiceCategory, Record<string, string>> = {
+  DEED: {
     SUBMITTED: 'ثبت اولیه درخواست',
     DOCUMENT_REVIEW: 'بررسی و تأیید مدارک',
     AGENCY_FOLLOW_UP: 'پیگیری اداری و ثبتی',
     COMPLETED: 'صدور و تحویل سند',
     FAILED: 'عدم تأیید پرونده',
   },
-  consultation: {
+  CONSULTATION: {
     SUBMITTED: 'ثبت اولیه درخواست',
     DOCUMENT_REVIEW: 'بررسی اولیه درخواست',
     AGENCY_FOLLOW_UP: 'در حال مذاکره و پیگیری',
     COMPLETED: 'نتیجه حاصل شد',
     FAILED: 'بدون نتیجه بسته شد',
   },
-  construction: {
+  CONSTRUCTION: {
     SUBMITTED: 'ثبت اولیه درخواست',
     DOCUMENT_REVIEW: 'بررسی و برآورد اولیه',
     AGENCY_FOLLOW_UP: 'در حال اجرای پروژه',

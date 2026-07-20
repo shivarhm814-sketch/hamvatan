@@ -27,7 +27,7 @@ export class SettingsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.STAFF)
   async updateSmsTemplate(@Body() dto: UpdateSmsTemplateDto) {
-    await this.settingsService.updateSmsTemplate(dto.status as CaseStatus, dto.template);
+    await this.settingsService.updateSmsTemplate(dto.status as CaseStatus, dto.category, dto.template);
     return this.settingsService.getSmsTemplates();
   }
 

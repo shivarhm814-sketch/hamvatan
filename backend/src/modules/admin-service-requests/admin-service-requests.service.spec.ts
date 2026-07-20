@@ -199,6 +199,21 @@ describe('AdminServiceRequestsService', () => {
       expect(notificationsMock.enqueueSms).not.toHaveBeenCalled();
       expect(prismaMock.$transaction).not.toHaveBeenCalled();
     });
+
+    it('looks up the template using the request\'s own serviceType, not the deed default', async () => {
+      prismaMock.adminServiceRequest.findUnique.mockResolvedValue({
+        id: 'req1',
+        trackingCode: 'ABCDEF12',
+        serviceType: AdminServiceType.PURCHASE_SALE_CONSULTATION,
+      });
+
+      await service.previewSms('req1', CaseStatus.AGENCY_FOLLOW_UP);
+
+      expect(settingsMock.getSmsTemplate).toHaveBeenCalledWith(
+        CaseStatus.AGENCY_FOLLOW_UP,
+        AdminServiceType.PURCHASE_SALE_CONSULTATION,
+      );
+    });
   });
 
   describe('updateInternalNotes', () => {
@@ -257,7 +272,7 @@ describe('AdminServiceRequestsService', () => {
           note: undefined,
         },
       });
-      expect(settingsMock.getSmsTemplate).toHaveBeenCalledWith(CaseStatus.DOCUMENT_REVIEW);
+      expect(settingsMock.getSmsTemplate).toHaveBeenCalledWith(CaseStatus.DOCUMENT_REVIEW, undefined);
       expect(notificationsMock.enqueueSms).toHaveBeenCalledWith(
         '09121234567',
         'وضعیت پرونده ABCDEF12 تغییر کرد.',

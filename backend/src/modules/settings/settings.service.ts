@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CaseStatus } from '@prisma/client';
+import { AdminServiceType, CaseStatus } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   DEFAULT_CONTACT_SETTINGS,
   DEFAULT_SMS_TEMPLATES,
+  SERVICE_CATEGORIES,
   SETTING_KEYS,
+  ServiceCategory,
+  serviceCategoryOf,
   smsTemplateKey,
 } from './settings.constants';
 
@@ -45,32 +48,47 @@ export class SettingsService {
     return this.getContactSettings();
   }
 
-  async getSmsTemplates(): Promise<Record<CaseStatus, string>> {
-    const statuses = Object.keys(DEFAULT_SMS_TEMPLATES) as CaseStatus[];
-    const rows = await this.prisma.setting.findMany({
-      where: { key: { in: statuses.map((status) => smsTemplateKey(status)) } },
-    });
+  async getSmsTemplates(): Promise<Record<ServiceCategory, Record<CaseStatus, string>>> {
+    const statuses = Object.keys(DEFAULT_SMS_TEMPLATES.DEED) as CaseStatus[];
+    const allKeys = SERVICE_CATEGORIES.flatMap((category) =>
+      statuses.map((status) => smsTemplateKey(status, category)),
+    );
+    const rows = await this.prisma.setting.findMany({ where: { key: { in: allKeys } } });
     const stored = Object.fromEntries(rows.map((row) => [row.key, row.value]));
 
-    return statuses.reduce(
-      (acc, status) => {
-        acc[status] = stored[smsTemplateKey(status)] ?? DEFAULT_SMS_TEMPLATES[status];
+    return SERVICE_CATEGORIES.reduce(
+      (acc, category) => {
+        acc[category] = statuses.reduce(
+          (statusAcc, status) => {
+            statusAcc[status] = stored[smsTemplateKey(status, category)] ?? DEFAULT_SMS_TEMPLATES[category][status];
+            return statusAcc;
+          },
+          {} as Record<CaseStatus, string>,
+        );
         return acc;
       },
-      {} as Record<CaseStatus, string>,
+      {} as Record<ServiceCategory, Record<CaseStatus, string>>,
     );
   }
 
-  async getSmsTemplate(status: CaseStatus): Promise<string> {
-    const row = await this.prisma.setting.findUnique({ where: { key: smsTemplateKey(status) } });
-    return row?.value ?? DEFAULT_SMS_TEMPLATES[status];
+  async getSmsTemplate(status: CaseStatus, serviceType?: AdminServiceType): Promise<string> {
+    const category = serviceCategoryOf(serviceType);
+    const row = await this.prisma.setting.findUnique({
+      where: { key: smsTemplateKey(status, category) },
+    });
+    return row?.value ?? DEFAULT_SMS_TEMPLATES[category][status];
   }
 
-  async updateSmsTemplate(status: CaseStatus, template: string): Promise<void> {
+  async updateSmsTemplate(
+    status: CaseStatus,
+    category: ServiceCategory,
+    template: string,
+  ): Promise<void> {
+    const key = smsTemplateKey(status, category);
     await this.prisma.setting.upsert({
-      where: { key: smsTemplateKey(status) },
+      where: { key },
       update: { value: template },
-      create: { key: smsTemplateKey(status), value: template },
+      create: { key, value: template },
     });
   }
 

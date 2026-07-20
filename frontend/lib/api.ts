@@ -272,11 +272,12 @@ export function getSmsTemplates(token: string): Promise<SmsTemplates> {
 export function updateSmsTemplate(
   token: string,
   status: CaseStatus,
+  category: 'DEED' | 'CONSULTATION' | 'CONSTRUCTION',
   template: string,
 ): Promise<SmsTemplates> {
   return apiFetch('/settings/sms-templates', {
     method: 'PATCH',
-    body: JSON.stringify({ status, template }),
+    body: JSON.stringify({ status, category, template }),
     token,
   });
 }

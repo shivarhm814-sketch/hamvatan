@@ -149,7 +149,7 @@ export interface ContactSettings {
   'contact.workingHours': string;
 }
 
-export type SmsTemplates = Record<CaseStatus, string>;
+export type SmsTemplates = Record<'DEED' | 'CONSULTATION' | 'CONSTRUCTION', Record<CaseStatus, string>>;
 
 export interface ServiceStatus {
   smsProvider: string;

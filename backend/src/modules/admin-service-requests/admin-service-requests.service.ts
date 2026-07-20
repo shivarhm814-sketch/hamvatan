@@ -121,7 +121,7 @@ export class AdminServiceRequestsService {
     if (!existing) {
       throw new NotFoundException('پرونده مورد نظر یافت نشد.');
     }
-    const message = await this.buildStatusSmsMessage(existing.trackingCode, status);
+    const message = await this.buildStatusSmsMessage(existing.trackingCode, status, existing.serviceType);
     return { message };
   }
 
@@ -149,7 +149,7 @@ export class AdminServiceRequestsService {
       return request;
     });
 
-    const message = await this.buildStatusSmsMessage(updated.trackingCode, dto.status);
+    const message = await this.buildStatusSmsMessage(updated.trackingCode, dto.status, existing.serviceType);
     await this.notificationsService.enqueueSms(updated.contactMobile, message);
 
     return updated;
@@ -163,8 +163,12 @@ export class AdminServiceRequestsService {
     return this.prisma.adminServiceRequest.update({ where: { id }, data: { internalNotes } });
   }
 
-  private async buildStatusSmsMessage(trackingCode: string, status: CaseStatus): Promise<string> {
-    const template = await this.settingsService.getSmsTemplate(status);
+  private async buildStatusSmsMessage(
+    trackingCode: string,
+    status: CaseStatus,
+    serviceType: AdminServiceType,
+  ): Promise<string> {
+    const template = await this.settingsService.getSmsTemplate(status, serviceType);
     return renderTemplate(template, { trackingCode });
   }
 

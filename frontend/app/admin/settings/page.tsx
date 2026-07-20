@@ -10,7 +10,7 @@ import {
 } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth';
 import type { CaseStatus, ContactSettings, ServiceStatus, SmsTemplates } from '@/types';
-import { caseStatusLabel } from '@/lib/utils';
+import { CASE_STATUS_LABELS_BY_CATEGORY, SERVICE_CATEGORIES, SERVICE_CATEGORY_LABELS_FA, ServiceCategory } from '@/lib/utils';
 
 const CASE_STATUSES: CaseStatus[] = [
   'SUBMITTED',
@@ -35,7 +35,7 @@ export default function AdminSettingsPage() {
   const [contactMessage, setContactMessage] = useState('');
   const [templateMessage, setTemplateMessage] = useState('');
   const [savingContact, setSavingContact] = useState(false);
-  const [savingStatus, setSavingStatus] = useState<CaseStatus | null>(null);
+  const [savingStatus, setSavingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const token = getAuthToken();
@@ -67,13 +67,14 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleSaveTemplate = async (status: CaseStatus, template: string) => {
+  const handleSaveTemplate = async (category: ServiceCategory, status: CaseStatus, template: string) => {
     const token = getAuthToken();
     if (!token) return;
-    setSavingStatus(status);
+    const savingKey = `${category}.${status}`;
+    setSavingStatus(savingKey);
     setTemplateMessage('');
     try {
-      const updated = await updateSmsTemplate(token, status, template);
+      const updated = await updateSmsTemplate(token, status, category, template);
       setTemplates(updated);
       setTemplateMessage('پیام پیامک ذخیره شد.');
     } catch {
@@ -120,20 +121,29 @@ export default function AdminSettingsPage() {
       <section className="mb-8 rounded-xl border border-line bg-surface p-5">
         <h2 className="mb-1 font-bold text-ink">پیام‌های پیامکی هر وضعیت پرونده</h2>
         <p className="mb-4 text-xs text-muted">
-          از عبارت <span dir="ltr">{'{trackingCode}'}</span> برای درج کد رهگیری در متن پیامک استفاده کنید.
+          هر گروه خدمتی متن جداگانه دارد — چون مثلاً «صدور و تحویل سند» برای یک درخواست مشاوره یا پروژه‌ی ساخت
+          معنی ندارد. از عبارت <span dir="ltr">{'{trackingCode}'}</span> برای درج کد رهگیری در متن پیامک استفاده کنید.
         </p>
         {!templates ? (
           <p className="text-muted">در حال بارگذاری...</p>
         ) : (
-          <div className="flex flex-col gap-4">
-            {CASE_STATUSES.map((status) => (
-              <TemplateEditor
-                key={status}
-                status={status}
-                initialValue={templates[status]}
-                saving={savingStatus === status}
-                onSave={(value) => handleSaveTemplate(status, value)}
-              />
+          <div className="flex flex-col gap-6">
+            {SERVICE_CATEGORIES.map((category) => (
+              <div key={category}>
+                <h3 className="mb-3 text-sm font-extrabold text-primary">{SERVICE_CATEGORY_LABELS_FA[category]}</h3>
+                <div className="flex flex-col gap-4">
+                  {CASE_STATUSES.map((status) => (
+                    <TemplateEditor
+                      key={`${category}-${status}`}
+                      category={category}
+                      status={status}
+                      initialValue={templates[category][status]}
+                      saving={savingStatus === `${category}.${status}`}
+                      onSave={(value) => handleSaveTemplate(category, status, value)}
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
             {templateMessage && <p className="text-sm text-sale">{templateMessage}</p>}
           </div>
@@ -164,11 +174,13 @@ export default function AdminSettingsPage() {
 }
 
 function TemplateEditor({
+  category,
   status,
   initialValue,
   saving,
   onSave,
 }: {
+  category: ServiceCategory;
   status: CaseStatus;
   initialValue: string;
   saving: boolean;
@@ -178,7 +190,9 @@ function TemplateEditor({
 
   return (
     <div className="rounded-lg border border-line p-3">
-      <label className="mb-1.5 block text-sm font-semibold text-ink">{caseStatusLabel(status)}</label>
+      <label className="mb-1.5 block text-sm font-semibold text-ink">
+        {CASE_STATUS_LABELS_BY_CATEGORY[category][status]}
+      </label>
       <textarea
         value={value}
         onChange={(e) => setValue(e.target.value)}

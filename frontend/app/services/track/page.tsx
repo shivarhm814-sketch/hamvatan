@@ -74,9 +74,9 @@ export default function CaseTrackingPage() {
               </p>
               <p className="text-sm text-muted">{adminServiceTypeLabel(result.serviceType)}</p>
             </div>
-            <StatusBadge status={result.status} />
+            <StatusBadge status={result.status} serviceType={result.serviceType} />
           </div>
-          <Timeline status={result.status} history={result.statusHistory} />
+          <Timeline status={result.status} history={result.statusHistory} serviceType={result.serviceType} />
         </div>
       )}
     </div>

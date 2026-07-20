@@ -24,6 +24,7 @@ export function Timeline({ status, history, serviceType }: TimelineProps) {
   const isFailed = status === 'FAILED';
   const currentIndex = isFailed ? reachedIndex(history) : STAGE_ORDER.indexOf(status);
   const dateByStatus = new Map(history.map((item) => [item.newStatus, item.createdAt]));
+  const noteByStatus = new Map(history.map((item) => [item.newStatus, item.note]));
 
   return (
     <div className="flex flex-col">
@@ -39,6 +40,7 @@ export function Timeline({ status, history, serviceType }: TimelineProps) {
         const isFailedStage = index === currentIndex && isFailed;
         const isLast = index === STAGE_ORDER.length - 1;
         const date = dateByStatus.get(stage);
+        const note = noteByStatus.get(stage);
 
         const dotClasses = isFailedStage
           ? 'bg-error text-white'
@@ -67,6 +69,7 @@ export function Timeline({ status, history, serviceType }: TimelineProps) {
             <div className="pb-8">
               <p className={`font-bold ${labelColor}`}>{caseStatusLabel(stage, serviceType)}</p>
               <p className="text-sm text-muted">{date ? formatDate(date) : '—'}</p>
+              {note && <p className="mt-1 text-sm text-ink">{note}</p>}
             </div>
           </div>
         );
