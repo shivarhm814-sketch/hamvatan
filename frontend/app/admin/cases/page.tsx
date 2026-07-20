@@ -147,12 +147,20 @@ export default function AdminCasesPage() {
                     </Link>
                   </td>
                   <td className="p-4">
-                    {adminServiceTypeLabel(c.serviceType)}
-                    {isConstructionType(c.serviceType) && (
-                      <span className="mr-1.5 rounded-full border border-line bg-soft px-2 py-0.5 align-middle text-[11px] font-semibold text-primary">
-                        ساخت
-                      </span>
-                    )}
+                    {(() => {
+                      const label = adminServiceTypeLabel(c.serviceType);
+                      const showBadge = isConstructionType(c.serviceType) && !label.includes('ساخت');
+                      return (
+                        <>
+                          {label}
+                          {showBadge && (
+                            <span className="mr-1.5 rounded-full border border-line bg-soft px-2 py-0.5 align-middle text-[11px] font-semibold text-primary">
+                              ساخت
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
                   </td>
                   <td className="p-4">{formatDate(c.createdAt)}</td>
                   <td className="p-4">
