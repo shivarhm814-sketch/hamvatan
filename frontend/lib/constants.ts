@@ -12,11 +12,10 @@ export interface Messenger {
   href?: string;
 }
 
-// پیام‌رسان‌های ستون «تماس با ما» در فوتر — جایگزین شماره تماس. فعلاً فقط آیکون
-// دارند (بدون href)؛ به‌محض اینکه آیدی/کانال هرکدام مشخص شود، href پر می‌شود.
+// پیام‌رسان‌های ستون «تماس با ما» در فوتر — جایگزین شماره تماس.
 export const FOOTER_CONTACT_MESSENGERS: Messenger[] = [
-  { name: 'بله', image: '/messengers/bale.jpg' },
-  { name: 'روبیکا', image: '/messengers/rubika.jpg' },
+  { name: 'بله', image: '/messengers/bale.jpg', href: 'https://ble.ir/Abc123' },
+  { name: 'روبیکا', image: '/messengers/rubika.jpg', href: 'https://rubika.ir/Hehecfy' },
 ];
 
 export const NAV_LINKS = [
